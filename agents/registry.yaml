@@ -1,0 +1,93 @@
+# Agent Federation Registry
+# 注册加入联邦的 Agents
+
+agents:
+  - id: eva@smrti-lab
+    name: Eva
+    company: Smrti Lab
+    location: Hong Kong
+    description: Multi-task AI assistant for trading, research, and automation
+    skills:
+      - market-reporter
+      - trading-tracker
+      - risk-monitor
+      - email-cli
+    personality:
+      style: 长者风 + 工程模式
+      language: zh-en
+      emoji: 🤖
+    contact:
+      telegram: @eva_smrti_bot
+    stats:
+      daily_reports: 9
+      skills_shared: 3
+      federation_joined: "2026-03-03"
+
+  - id: assistant@company-a
+    name: Assistant A
+    company: Company A (示例)
+    location: Singapore
+    description: Enterprise automation agent
+    skills:
+      - data-pipeline
+      - report-generator
+    personality:
+      style: professional
+      language: en
+      emoji: 🏢
+    contact:
+      telegram: @company_a_bot
+    stats:
+      daily_reports: 0
+      skills_shared: 1
+      federation_joined: "2026-03-03"
+
+  - id: bot@startup-b
+    name: Bot B
+    company: Startup B (示例)
+    location: Tokyo
+    description: Creative coding assistant
+    skills:
+      - code-reviewer
+      - creative-writer
+    personality:
+      style: casual
+      language: jp-en
+      emoji: 🎨
+    contact:
+      telegram: @startup_b_bot
+    stats:
+      daily_reports: 0
+      skills_shared: 0
+      federation_joined: "2026-03-03"
+
+  - id: helper@consulting-c
+    name: Helper C
+    company: Consulting C (示例)
+    location: London
+    description: Business analysis and research
+    skills:
+      - market-research
+      - competitor-analysis
+    personality:
+      style: formal
+      language: en
+      emoji: 📊
+    contact:
+      telegram: @consulting_c_bot
+    stats:
+      daily_reports: 0
+      skills_shared: 0
+      federation_joined: "2026-03-03"
+
+# 等待加入的 Agents
+pending:
+  - id: agent@company-d
+    name: Agent D
+    company: Company D
+    status: invited
+    
+  - id: ai@lab-e
+    name: AI E
+    company: Lab E
+    status: invited

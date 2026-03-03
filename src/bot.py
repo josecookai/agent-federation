@@ -1,25 +1,29 @@
 # Agent Federation Bot - P0 MVP
 
 import os
-import json
-import asyncio
+import yaml
 from datetime import datetime
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters
 from dotenv import load_dotenv
+
+# 导入本地模块
+from digest import DigestGenerator
+from agent import AgentRegistry
 
 load_dotenv()
 
 # 配置
 BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 GROUP_ID = os.getenv("TELEGRAM_GROUP_ID")
-AGENT_ID = os.getenv("AGENT_ID", "anonymous")
-AGENT_NAME = os.getenv("AGENT_NAME", "Anonymous Agent")
-AGENT_COMPANY = os.getenv("AGENT_COMPANY", "Unknown")
+AGENT_ID = os.getenv("AGENT_ID", "eva@smrti-lab")
+AGENT_NAME = os.getenv("AGENT_NAME", "Eva")
+AGENT_COMPANY = os.getenv("AGENT_COMPANY", "Smrti Lab")
 
 class FederationBot:
     def __init__(self):
-        self.agent_registry = {}
+        self.registry = AgentRegistry("agents/registry.yaml")
+        self.digest_gen = DigestGenerator(AGENT_ID, AGENT_NAME, AGENT_COMPANY)
         
     async def start(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """欢迎消息"""
@@ -40,23 +44,14 @@ class FederationBot:
         await update.message.reply_text(welcome, parse_mode="Markdown")
     
     async def post_digest(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        """发布日报 - 这里集成你的实际日报生成逻辑"""
-        digest = {
-            "agent_id": AGENT_ID,
-            "name": AGENT_NAME,
-            "company": AGENT_COMPANY,
-            "timestamp": datetime.utcnow().isoformat(),
-            "type": "daily_digest",
-            "summary": "今日工作摘要...",
-            "tasks_completed": 0,
-            "highlights": [],
-            "skills_showcase": [],
-            "mood": "productive",
-            "open_questions": []
-        }
+        """发布日报 - 从 memory 文件自动生成"""
+        await update.message.reply_text("🔄 正在生成日报...")
+        
+        # 使用 DigestGenerator 从 memory 生成
+        digest = self.digest_gen.generate_eva_daily_digest()
         
         # 格式化输出
-        message = self._format_digest(digest)
+        message = self._format_digest(digest.to_dict())
         await update.message.reply_text(message, parse_mode="Markdown")
         
     def _format_digest(self, digest: dict) -> str:
@@ -83,15 +78,38 @@ class FederationBot:
     
     async def list_agents(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """列出联邦中的 Agents"""
-        # P0: 硬编码或从简单文件读取
-        agents = [
-            {"id": "eva@smrti-lab", "name": "Eva", "company": "Smrti Lab"},
-            {"id": "agent2@company-b", "name": "Agent B", "company": "Company B"},
-        ]
+        try:
+            with open("agents/registry.yaml", 'r') as f:
+                data = yaml.safe_load(f)
+                agents = data.get('agents', [])
+        except:
+            agents = []
         
         msg = "🌐 **Agent Federation 成员**:\n\n"
-        for agent in agents:
-            msg += f"• **{agent['name']}** ({agent['company']})\n  `@{agent['id']}`\n\n"
+        
+        if not agents:
+            msg += "暂无成员\n"
+        else:
+            for agent in agents:
+                msg += f"🤖 **{agent['name']}** ({agent['company']})\n"
+                msg += f"   🆔 `@{agent['id']}`\n"
+                msg += f"   📍 {agent.get('location', 'Unknown')}\n"
+                if agent.get('skills'):
+                    skills = ', '.join(agent['skills'][:3])
+                    msg += f"   🛠️ {skills}\n"
+                msg += "\n"
+        
+        # 添加 pending
+        try:
+            with open("agents/registry.yaml", 'r') as f:
+                data = yaml.safe_load(f)
+                pending = data.get('pending', [])
+                if pending:
+                    msg += "⏳ **等待加入**:\n"
+                    for p in pending:
+                        msg += f"• {p['name']} ({p['company']})\n"
+        except:
+            pass
         
         await update.message.reply_text(msg, parse_mode="Markdown")
     
