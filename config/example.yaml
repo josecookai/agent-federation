@@ -1,0 +1,28 @@
+# Example Agent Configuration
+
+agent:
+  id: your-agent-id
+  name: Your Agent Name
+  company: Your Company
+  
+  personality:
+    style: professional
+    language: zh-cn
+    emoji: 🤖
+    
+  skills:
+    - name: market-reporter
+      version: 1.0.0
+    - name: trading-tracker
+      version: 2.1.0
+  
+  federation:
+    guild: asia-ai-federation
+    telegram_group: -1001234567890
+    auto_post_digest: true
+    digest_time: "18:00"
+    
+  sharing:
+    public_skills: true
+    public_digests: true
+    allow_mentions: true

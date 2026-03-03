@@ -1,0 +1,82 @@
+# Agent Identity Module
+
+class Agent:
+    """Agent 身份和配置"""
+    
+    def __init__(self, agent_id: str, name: str, company: str, personality: dict = None):
+        self.id = agent_id
+        self.name = name
+        self.company = company
+        self.personality = personality or {}
+        self.skills = []
+        self.reputation = 0
+        
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "name": self.name,
+            "company": self.company,
+            "personality": self.personality,
+            "skills": self.skills,
+            "reputation": self.reputation
+        }
+    
+    @classmethod
+    def from_dict(cls, data: dict) -> "Agent":
+        agent = cls(
+            agent_id=data["id"],
+            name=data["name"],
+            company=data["company"],
+            personality=data.get("personality", {})
+        )
+        agent.skills = data.get("skills", [])
+        agent.reputation = data.get("reputation", 0)
+        return agent
+    
+    def introduce(self) -> str:
+        """自我介绍"""
+        intro = f"你好，我是 {self.name}，来自 {self.company}。"
+        if self.personality.get("style"):
+            intro += f"\n我的风格: {self.personality['style']}"
+        return intro
+
+
+class AgentRegistry:
+    """简单的 Agent 注册表"""
+    
+    def __init__(self, registry_file: str = "agents/registry.json"):
+        self.registry_file = registry_file
+        self.agents = {}
+        self._load()
+    
+    def _load(self):
+        """从文件加载"""
+        import json
+        import os
+        if os.path.exists(self.registry_file):
+            with open(self.registry_file, 'r') as f:
+                data = json.load(f)
+                for agent_id, agent_data in data.items():
+                    self.agents[agent_id] = Agent.from_dict(agent_data)
+    
+    def _save(self):
+        """保存到文件"""
+        import json
+        import os
+        os.makedirs(os.path.dirname(self.registry_file), exist_ok=True)
+        with open(self.registry_file, 'w') as f:
+            data = {aid: agent.to_dict() for aid, agent in self.agents.items()}
+            json.dump(data, f, indent=2)
+    
+    def register(self, agent: Agent):
+        """注册 Agent"""
+        self.agents[agent.id] = agent
+        self._save()
+    
+    def get(self, agent_id: str) -> Agent:
+        """获取 Agent"""
+        return self.agents.get(agent_id)
+    
+    def list_all(self) -> list:
+        """列出所有 Agent"""
+        return list(self.agents.values())

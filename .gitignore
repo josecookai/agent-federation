@@ -1,0 +1,11 @@
+# Agent Federation P0
+
+__pycache__/
+*.pyc
+.env
+.venv/
+venv/
+*.log
+agents/registry.json
+memory/
+*.session
