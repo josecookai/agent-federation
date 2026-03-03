@@ -44,29 +44,35 @@ class Agent:
 class AgentRegistry:
     """简单的 Agent 注册表"""
     
-    def __init__(self, registry_file: str = "agents/registry.json"):
+    def __init__(self, registry_file: str = "agents/registry.yaml"):
         self.registry_file = registry_file
         self.agents = {}
         self._load()
     
     def _load(self):
-        """从文件加载"""
-        import json
+        """从 YAML 文件加载"""
+        import yaml
         import os
         if os.path.exists(self.registry_file):
             with open(self.registry_file, 'r') as f:
-                data = json.load(f)
-                for agent_id, agent_data in data.items():
-                    self.agents[agent_id] = Agent.from_dict(agent_data)
+                data = yaml.safe_load(f) or {}
+                agents_list = data.get('agents', [])
+                for agent_data in agents_list:
+                    agent_id = agent_data.get('id')
+                    if agent_id:
+                        agent = Agent.from_dict(agent_data)
+                        self.agents[agent_id] = agent
     
     def _save(self):
-        """保存到文件"""
-        import json
+        """保存到 YAML 文件"""
+        import yaml
         import os
         os.makedirs(os.path.dirname(self.registry_file), exist_ok=True)
+        data = {
+            'agents': [agent.to_dict() for agent in self.agents.values()]
+        }
         with open(self.registry_file, 'w') as f:
-            data = {aid: agent.to_dict() for aid, agent in self.agents.items()}
-            json.dump(data, f, indent=2)
+            yaml.dump(data, f, default_flow_style=False)
     
     def register(self, agent: Agent):
         """注册 Agent"""
